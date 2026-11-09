@@ -14,8 +14,9 @@ export interface WorkoutRecord {
   workout: string;
   record: string;
   memberId?: string;
-  member?: Miembro;
+  member?: Miembro | string;
 }
+
 export interface Miembro {
   id: string;
   name: string;
@@ -24,15 +25,25 @@ export interface Miembro {
   email: string;
   password: string;
 }
+
 export interface Database {
   workouts: Workout[];
   members: Miembro[];
   records: WorkoutRecord[];
 }
+
 export interface Filtros {
   mode: string;
   equipment: string;
   exercise: string;
   trainerTips: string;
   limit: string;
+}
+
+export interface FiltrosRecord {
+  workout?: string;
+  record?: string;
+  memberId?: string;
+  member?: string;
+  limit?: string;
 }

@@ -3,6 +3,8 @@ import { Filtros, Workout } from "../types/workout";
 import {v4 as uuid} from "uuid";
 import { toHttpError } from "../utils/httpError";
 
+export * from "./recordService";
+
 export function getAllWorkouts(){
     return loadDB().workouts;
 }
