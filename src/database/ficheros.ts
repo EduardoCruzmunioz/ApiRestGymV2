@@ -7,15 +7,18 @@ const DB_PATH: string = path.resolve(import.meta.dirname, "../../data/db.json");
 
 export const loadDB = (): Database =>
   JSON.parse(readFileSync(DB_PATH, "utf-8"));
+
 export const saveToDatabase = (db: Database): void =>
   writeFileSync(DB_PATH, JSON.stringify(db, null, 2), "utf-8");
 
-export const createWorkout = (workout: Workout): boolean => {
+// ================= WORKOUTS =================
+
+export const createWorkout = (workout: Workout): Workout => {
   try {
-    let database: Database = loadDB();
+    const database: Database = loadDB();
     database.workouts.push(workout);
     saveToDatabase(database);
-    return true;
+    return workout;
   } catch (error) {
     throw toHttpError(error);
   }
@@ -23,7 +26,7 @@ export const createWorkout = (workout: Workout): boolean => {
 
 export const deleteWorkout = (id: string): boolean => {
   try {
-    let database: Database = loadDB();
+    const database: Database = loadDB();
     database.workouts = database.workouts.filter((workout) => workout.id != id);
     saveToDatabase(database);
     return true;
@@ -32,26 +35,28 @@ export const deleteWorkout = (id: string): boolean => {
   }
 };
 
-export const updateWorkout = (workout: Workout): boolean => {
+export const updateWorkout = (workout: Workout): Workout => {
   try {
-    let database: Database = loadDB();
+    const database: Database = loadDB();
     database.workouts = database.workouts.filter(
       (workoutLista) => workout.id != workoutLista.id,
     );
     database.workouts.push(workout);
     saveToDatabase(database);
-    return true;
+    return workout;
   } catch (error) {
     throw toHttpError(error);
   }
 };
 
-export const createRecord = (record: WorkoutRecord): boolean => {
+// ================= RECORDS =================
+
+export const createRecord = (record: WorkoutRecord): WorkoutRecord => {
   try {
-    let database: Database = loadDB();
+    const database: Database = loadDB();
     database.records.push(record);
     saveToDatabase(database);
-    return true;
+    return record;
   } catch (error) {
     throw toHttpError(error);
   }
@@ -59,8 +64,8 @@ export const createRecord = (record: WorkoutRecord): boolean => {
 
 export const deleteRecord = (id: string): boolean => {
   try {
-    let database: Database = loadDB();
-    database.records = database.records.filter((record) => record.id != id);
+    const database: Database = loadDB();
+    database.records = database.records.filter((rec) => rec.id != id);
     saveToDatabase(database);
     return true;
   } catch (error) {
@@ -68,15 +73,15 @@ export const deleteRecord = (id: string): boolean => {
   }
 };
 
-export const updateRecord = (record: WorkoutRecord): boolean => {
+export const updateRecord = (record: WorkoutRecord): WorkoutRecord => {
   try {
-    let database: Database = loadDB();
+    const database: Database = loadDB();
     database.records = database.records.filter(
-      (recordLista) => record.id != recordLista.id,
+      (rec) => record.id != rec.id,
     );
     database.records.push(record);
     saveToDatabase(database);
-    return true;
+    return record;
   } catch (error) {
     throw toHttpError(error);
   }

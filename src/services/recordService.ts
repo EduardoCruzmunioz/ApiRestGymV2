@@ -4,11 +4,11 @@ import {
   deleteRecord as eliminarRecord,
   updateRecord,
 } from "../database/ficheros";
-import { WorkoutRecord } from "../types/workout";
+import type { WorkoutRecord } from "../types/workout";
 import { v4 as uuid } from "uuid";
 import { toHttpError } from "../utils/httpError";
 
-export function getAllRecords() {
+export function getAllRecords(): WorkoutRecord[] {
   try {
     return loadDB().records;
   } catch (error) {
@@ -16,15 +16,15 @@ export function getAllRecords() {
   }
 }
 
-export function getRecord(id: string) {
+export function getRecord(id: string): WorkoutRecord | null {
   try {
-    return loadDB().records.find((record) => record.id == id) ?? null;
+    return loadDB().records.find((record) => record.id === id) ?? null;
   } catch (error) {
     throw toHttpError(error);
   }
 }
 
-export function postRecord(record: WorkoutRecord) {
+export function postRecord(record: WorkoutRecord): WorkoutRecord {
   try {
     const id: string = uuid();
     record.id = id;
@@ -34,9 +34,12 @@ export function postRecord(record: WorkoutRecord) {
   }
 }
 
-export function patchRecord(record: WorkoutRecord) {
+export function patchRecord(record: WorkoutRecord): WorkoutRecord {
   try {
-    let recordAnt: WorkoutRecord = getRecord(record.id)!;
+    const recordAnt: WorkoutRecord | null = getRecord(record.id);
+    if (!recordAnt) {
+      throw new Error(`Record with id '${record.id}' not found`);
+    }
     if (record.workout == null) record.workout = recordAnt.workout;
     if (record.record == null) record.record = recordAnt.record;
     if (record.memberId == null) record.memberId = recordAnt.memberId;
@@ -47,7 +50,7 @@ export function patchRecord(record: WorkoutRecord) {
   }
 }
 
-export function deleteRecord(id: string) {
+export function deleteRecord(id: string): boolean {
   try {
     return eliminarRecord(id);
   } catch (error) {

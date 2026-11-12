@@ -40,10 +40,10 @@ const cache = apicache.middleware;
  *           example: ["21 thrusters", "12 rope climbs, 15 ft"]
  *         createdAt:
  *           type: string
- *           example: 4/20/2022, 2:21:56 PM
+ *           example: "1793014703120"
  *         updatedAt:
  *           type: string
- *           example: 4/20/2022, 2:21:56 PM
+ *           example: "1793014703120"
  *         trainerTips:
  *           type: array
  *           items:
@@ -57,7 +57,7 @@ const cache = apicache.middleware;
  *           example: fail
  *         data:
  *           type: string
- *           example: Mensaje de error
+ *           example: Mensaje descriptivo del error
  */
 
 /**
@@ -170,8 +170,8 @@ router.get("/", cache("1 minutes"), getAllWorkouts);
  *               type: object
  *               properties:
  *                 status:
- *                   type: integer
- *                   example: 200
+ *                   type: string
+ *                   example: ok
  *                 data:
  *                   $ref: '#/components/schemas/Workout'
  *       400:
@@ -301,8 +301,7 @@ router.get("/:id/records", cache("1 minutes"), (request, response) => {
  *                   type: string
  *                   example: ok
  *                 data:
- *                   type: boolean
- *                   example: true
+ *                   $ref: '#/components/schemas/Workout'
  *       400:
  *         description: Faltan campos obligatorios en el cuerpo de la petición
  *         content:
@@ -378,8 +377,7 @@ router.post("/", postWorkout);
  *                   type: string
  *                   example: ok
  *                 data:
- *                   type: boolean
- *                   example: true
+ *                   $ref: '#/components/schemas/Workout'
  *       400:
  *         description: Intento de modificar ID o fecha de creación, o ID ausente
  *         content:
@@ -427,8 +425,8 @@ router.patch("/:id", patchWorkout);
  *               type: object
  *               properties:
  *                 status:
- *                   type: integer
- *                   example: 200
+ *                   type: string
+ *                   example: ok
  *                 data:
  *                   type: boolean
  *                   example: true

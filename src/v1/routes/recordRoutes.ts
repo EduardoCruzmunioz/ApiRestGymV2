@@ -57,7 +57,7 @@ const cache = apicache.middleware;
  *         name: record
  *         schema:
  *           type: string
- *         description: Filtrar por texto contenido en la marca (ej. reps, 13:45)
+ *         description: "Filtrar por texto contenido en la marca (ej: reps, 13:45)"
  *       - in: query
  *         name: memberId
  *         schema:
@@ -144,8 +144,8 @@ router.get("/", cache("1 minutes"), getAllRecords);
  *               type: object
  *               properties:
  *                 status:
- *                   type: integer
- *                   example: 200
+ *                   type: string
+ *                   example: ok
  *                 data:
  *                   $ref: '#/components/schemas/Record'
  *       400:
@@ -222,8 +222,7 @@ router.get("/:id", getRecord);
  *                   type: string
  *                   example: ok
  *                 data:
- *                   type: boolean
- *                   example: true
+ *                   $ref: '#/components/schemas/Record'
  *       400:
  *         description: Faltan campos obligatorios (workout o record)
  *         content:
@@ -291,8 +290,7 @@ router.post("/", postRecord);
  *                   type: string
  *                   example: ok
  *                 data:
- *                   type: boolean
- *                   example: true
+ *                   $ref: '#/components/schemas/Record'
  *       400:
  *         description: Intento de modificar ID o petición incorrecta
  *         content:
@@ -340,8 +338,8 @@ router.patch("/:id", patchRecord);
  *               type: object
  *               properties:
  *                 status:
- *                   type: integer
- *                   example: 200
+ *                   type: string
+ *                   example: ok
  *                 data:
  *                   type: boolean
  *                   example: true
