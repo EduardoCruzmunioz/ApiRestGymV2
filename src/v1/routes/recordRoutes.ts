@@ -93,16 +93,31 @@ const cache = apicache.middleware;
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: fail
- *                 data:
- *                   type: string
- *                   example: limit must be a positive integer
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: limit must be a positive integer
  *       401:
  *         description: No autorizado (falta o API Key incorrecta)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               faltaApiKey:
+ *                 value:
+ *                   status: fail
+ *                   data: "no puedes hacer nada sin esta apikey: EduApiKey"
+ *               apiKeyInvalida:
+ *                 value:
+ *                   status: fail
+ *                   data: "API Key no válida"
+ *       500:
+ *         description: Error interno o de base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/", cache("1 minutes"), getAllRecords);
 
@@ -133,10 +148,36 @@ router.get("/", cache("1 minutes"), getAllRecords);
  *                   example: 200
  *                 data:
  *                   $ref: '#/components/schemas/Record'
+ *       400:
+ *         description: ID ausente o no válido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Récord no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Record with id 'ad75d475-ac57-44f4-a02a-8f6def58ff56' not found
+ *       500:
+ *         description: Error interno del servidor (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id", getRecord);
 
@@ -185,8 +226,25 @@ router.get("/:id", getRecord);
  *                   example: true
  *       400:
  *         description: Faltan campos obligatorios (workout o record)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error al guardar en base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/", postRecord);
 
@@ -224,10 +282,38 @@ router.post("/", postRecord);
  *     responses:
  *       201:
  *         description: Récord actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 data:
+ *                   type: boolean
+ *                   example: true
  *       400:
- *         description: ID no modificable o petición incorrecta
+ *         description: Intento de modificar ID o petición incorrecta
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error al actualizar en base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch("/:id", patchRecord);
 
@@ -247,9 +333,39 @@ router.patch("/:id", patchRecord);
  *         description: ID del récord a eliminar
  *     responses:
  *       200:
- *         description: Récord eliminado
+ *         description: Récord eliminado con éxito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 data:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: ID ausente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error al eliminar en base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.delete("/:id", deleteRecord);
 

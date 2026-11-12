@@ -49,6 +49,15 @@ const cache = apicache.middleware;
  *           items:
  *             type: string
  *           example: ["Split the 21 thrusters as needed", "Try to do the 9 and 6 thrusters unbroken"]
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           example: fail
+ *         data:
+ *           type: string
+ *           example: Mensaje de error
  */
 
 /**
@@ -105,16 +114,36 @@ const cache = apicache.middleware;
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: fail
- *                 data:
- *                   type: string
- *                   example: limit must be a positive integer
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               limiteInvalido:
+ *                 value:
+ *                   status: fail
+ *                   data: limit must be a positive integer
  *       401:
- *         description: No autorizado (falta o API Key incorrecta)
+ *         description: No autorizado (falta API Key o no coincide)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               faltaApiKey:
+ *                 value:
+ *                   status: fail
+ *                   data: "no puedes hacer nada sin esta apikey: EduApiKey"
+ *               apiKeyInvalida:
+ *                 value:
+ *                   status: fail
+ *                   data: "API Key no válida"
+ *       500:
+ *         description: Error interno del servidor o de base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Error de lectura o fallo en base de datos
  */
 router.get("/", cache("1 minutes"), getAllWorkouts);
 
@@ -145,8 +174,36 @@ router.get("/", cache("1 minutes"), getAllWorkouts);
  *                   example: 200
  *                 data:
  *                   $ref: '#/components/schemas/Workout'
+ *       400:
+ *         description: Parámetro ID ausente o no válido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
- *         description: No autorizado
+ *         description: No autorizado (falta o API Key no válida)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Entrenamiento no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Workout with id '61dbae02-c147-4e28-863c-db7bd402b2d6' not found
+ *       500:
+ *         description: Error interno del servidor (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id", getWorkouts);
 
@@ -167,8 +224,24 @@ router.get("/:id", getWorkouts);
  *     responses:
  *       200:
  *         description: Records obtenidos correctamente
+ *       400:
+ *         description: Parámetro límite o ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id/records", cache("1 minutes"), (request, response) => {
   request.query.workout = request.params.id;
@@ -232,8 +305,25 @@ router.get("/:id/records", cache("1 minutes"), (request, response) => {
  *                   example: true
  *       400:
  *         description: Faltan campos obligatorios en el cuerpo de la petición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error al guardar en base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/", postWorkout);
 
@@ -279,10 +369,38 @@ router.post("/", postWorkout);
  *     responses:
  *       201:
  *         description: Entrenamiento actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 data:
+ *                   type: boolean
+ *                   example: true
  *       400:
- *         description: ID no modificable o petición incorrecta
+ *         description: Intento de modificar ID o fecha de creación, o ID ausente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error al actualizar en base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch("/:id", patchWorkout);
 
@@ -302,9 +420,39 @@ router.patch("/:id", patchWorkout);
  *         description: ID del entrenamiento a eliminar
  *     responses:
  *       200:
- *         description: Entrenamiento eliminado
+ *         description: Entrenamiento eliminado con éxito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 data:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: ID ausente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: fail
+ *               data: Bad request
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error al eliminar en base de datos (HttpError)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.delete("/:id", deleteWorkout);
 

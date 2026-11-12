@@ -11,50 +11,60 @@ import { toHttpError } from "../utils/httpError";
 
 const MIN_LIMIT = 1;
 
+// ================= WORKOUT CONTROLLERS =================
+
 export function getAllWorkouts(request: Request, response: Response) {
-  const { mode, equipment, exercise, trainerTips, limit } =
-    request.query as unknown as Filtros;
+  try {
+    const { mode, equipment, exercise, trainerTips, limit } =
+      request.query as unknown as Filtros;
 
-  const parsedLimit = limit == undefined ? undefined : Number(limit);
-  if (
-    parsedLimit != undefined &&
-    (!Number.isInteger(parsedLimit) || parsedLimit < MIN_LIMIT)
-  ) {
-    response.status(400).send({
-      status: "fail",
-      data: "limit must be a positive integer",
+    const parsedLimit = limit == undefined ? undefined : Number(limit);
+    if (
+      parsedLimit != undefined &&
+      (!Number.isInteger(parsedLimit) || parsedLimit < MIN_LIMIT)
+    ) {
+      response.status(400).send({
+        status: "fail",
+        data: "limit must be a positive integer",
+      });
+      return;
+    }
+
+    let workouts: Workout[] = workoutService.getAllWorkouts();
+
+    if (mode)
+      workouts = workouts.filter(
+        (workout) => workout.mode.toLowerCase() === mode.toLowerCase(),
+      );
+
+    if (equipment)
+      workouts = workouts.filter((workout) =>
+        workout.equipment.includes(equipment),
+      );
+
+    if (exercise)
+      workouts = workouts.filter((workout) =>
+        workout.exercises.includes(exercise),
+      );
+
+    if (trainerTips)
+      workouts = workouts.filter((workout) =>
+        workout.trainerTips.includes(trainerTips),
+      );
+
+    if (parsedLimit) workouts = workouts.slice(0, parsedLimit);
+
+    response.send({
+      status: "ok",
+      data: workouts,
     });
-    return;
+  } catch (error: any) {
+    const httpError = toHttpError(error);
+    response.status(httpError.status).send({
+      status: "fail",
+      data: httpError.message,
+    });
   }
-
-  let workouts: Workout[] = workoutService.getAllWorkouts();
-
-  if (mode)
-    workouts = workouts.filter(
-      (workout) => workout.mode.toLowerCase() === mode.toLowerCase(),
-    );
-
-  if (equipment)
-    workouts = workouts.filter((workout) =>
-      workout.equipment.includes(equipment),
-    );
-
-  if (exercise)
-    workouts = workouts.filter((workout) =>
-      workout.exercises.includes(exercise),
-    );
-
-  if (trainerTips)
-    workouts = workouts.filter((workout) =>
-      workout.trainerTips.includes(trainerTips),
-    );
-
-  if (parsedLimit) workouts = workouts.slice(0, parsedLimit);
-
-  response.send({
-    status: "ok",
-    data: workouts,
-  });
 }
 
 export function getWorkouts(request: Request, response: Response) {
@@ -65,10 +75,26 @@ export function getWorkouts(request: Request, response: Response) {
       data: "Bad request",
     });
   } else {
-    response.send({
-      status: 200,
-      data: workoutService.getWorkout(id.toString()),
-    });
+    try {
+      const workout = workoutService.getWorkout(id.toString());
+      if (!workout) {
+        response.status(404).send({
+          status: "fail",
+          data: `Workout with id '${id}' not found`,
+        });
+        return;
+      }
+      response.send({
+        status: 200,
+        data: workout,
+      });
+    } catch (error: any) {
+      const httpError = toHttpError(error);
+      response.status(httpError.status).send({
+        status: "fail",
+        data: httpError.message,
+      });
+    }
   }
 }
 
@@ -86,10 +112,18 @@ export function postWorkout(request: Request, response: Response) {
       data: "Bad request",
     });
   } else {
-    response.status(201).send({
-      status: "ok",
-      data: workoutService.postWorkout(body),
-    });
+    try {
+      response.status(201).send({
+        status: "ok",
+        data: workoutService.postWorkout(body),
+      });
+    } catch (error: any) {
+      const httpError = toHttpError(error);
+      response.status(httpError.status).send({
+        status: "fail",
+        data: httpError.message,
+      });
+    }
   }
 }
 
@@ -108,11 +142,19 @@ export function patchWorkout(request: Request, response: Response) {
         data: "Bad request",
       });
     } else {
-      body.id = id.toString();
-      response.status(201).send({
-        status: "ok",
-        data: workoutService.patchWorkout(body),
-      });
+      try {
+        body.id = id.toString();
+        response.status(201).send({
+          status: "ok",
+          data: workoutService.patchWorkout(body),
+        });
+      } catch (error: any) {
+        const httpError = toHttpError(error);
+        response.status(httpError.status).send({
+          status: "fail",
+          data: httpError.message,
+        });
+      }
     }
   }
 }
@@ -125,12 +167,22 @@ export function deleteWorkout(request: Request, response: Response) {
       data: "Bad request",
     });
   } else {
-    response.send({
-      status: 200,
-      data: workoutService.deleteWorkout(id.toString()),
-    });
+    try {
+      response.send({
+        status: 200,
+        data: workoutService.deleteWorkout(id.toString()),
+      });
+    } catch (error: any) {
+      const httpError = toHttpError(error);
+      response.status(httpError.status).send({
+        status: "fail",
+        data: httpError.message,
+      });
+    }
   }
 }
+
+// ================= RECORD CONTROLLERS =================
 
 export function getAllRecords(request: Request, response: Response) {
   try {
