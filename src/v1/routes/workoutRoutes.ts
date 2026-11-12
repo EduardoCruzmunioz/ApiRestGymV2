@@ -73,7 +73,7 @@ const cache = apicache.middleware;
  *         name: mode
  *         schema:
  *           type: string
- *         description: Modo del entrenamiento (ej: For Time, AMRAP 12)
+ *         description: "Modo del entrenamiento (ej: For Time, AMRAP 12)"
  *       - in: query
  *         name: equipment
  *         schema:
