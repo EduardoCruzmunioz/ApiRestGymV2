@@ -2,6 +2,7 @@ import express from "express";
 import { Express, Request, Response, NextFunction } from "express";
 import { env } from "./config/env";
 import workoutRouter, { recordRouter } from "./v1/routes";
+import { swaggerDocs } from "./v1/swagger";
 import cors from "cors";
 
 const port = env.port;
@@ -10,6 +11,11 @@ app.use(cors());
 app.use(express.json());
 
 app.use((request: Request, response: Response, next: NextFunction) => {
+  // Permitir acceso libre a la interfaz y especificación de Swagger
+  if (request.path.startsWith("/api/v1/docs")) {
+    return next();
+  }
+
   let rawApiKey =
     request.headers["x-api-key"] ||
     request.headers["apikey"] ||
@@ -44,6 +50,7 @@ app.use((request: Request, response: Response, next: NextFunction) => {
 app.use("/api/v1/workouts", workoutRouter);
 app.use("/api/v1/records", recordRouter);
 
-app.listen(port, () =>
-  console.log(`Servidor ejecutandose en el puerto (${port})`),
-);
+app.listen(port, () => {
+  console.log(`Servidor ejecutandose en el puerto (${port})`);
+  swaggerDocs(app, port);
+});
